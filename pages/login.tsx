@@ -4,8 +4,8 @@ import Head from 'next/head'
 
 export default function Login() {
   const router = useRouter()
-  const [username, setUsername] = useState('SATPAM01')
-  const [password, setPassword] = useState('123456')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')

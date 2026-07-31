@@ -4,8 +4,8 @@ import Head from 'next/head'
 
 export default function AdminLogin() {
   const router = useRouter()
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('admin123')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -26,7 +26,7 @@ export default function AdminLogin() {
         localStorage.setItem('ayola_admin_session', JSON.stringify(adminData))
         router.push('/admin')
       } else {
-        setError('Username atau Password Admin salah (Default: admin / admin123)')
+        setError('Username atau Password Admin salah')
         setLoading(false)
       }
     }, 500)
@@ -87,15 +87,10 @@ export default function AdminLogin() {
             />
           </div>
 
-          <div className='p-3 bg-slate-950/50 rounded-xl border border-slate-800 text-[11px] text-slate-400 font-mono flex items-center justify-between'>
-            <span>Default Username: <strong className='text-amber-400'>admin</strong></span>
-            <span>Pass: <strong className='text-amber-400'>admin123</strong></span>
-          </div>
-
           <button
             type='submit'
             disabled={loading}
-            className='w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-sm uppercase tracking-wider'
+            className='w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold rounded-xl shadow-lg shadow-amber-500/20 active:scale-[0.98] transition-all text-sm uppercase tracking-wider mt-2'
           >
             {loading ? 'Memverifikasi...' : 'Masuk Portal Admin 🔑'}
           </button>
