@@ -1,14 +1,23 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { getStoredLogs, getStoredPoints, getStoredGuards, formatDisplayTime } from '@/lib/mock-data'
 import { PatrolLog } from '@/types'
 
 export default function ReportPdfPreview() {
+  const router = useRouter()
   const [logs, setLogs] = useState<PatrolLog[]>([])
   const [printDate, setPrintDate] = useState('')
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const adminSession = localStorage.getItem('ayola_admin_session')
+      if (!adminSession) {
+        router.push('/admin/login')
+        return
+      }
+    }
     setLogs(getStoredLogs())
     setPrintDate(new Date().toLocaleDateString('id-ID', {
       weekday: 'long',
@@ -18,7 +27,7 @@ export default function ReportPdfPreview() {
       hour: '2-digit',
       minute: '2-digit'
     }))
-  }, [])
+  }, [router])
 
   return (
     <div className='min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 font-sans select-text'>

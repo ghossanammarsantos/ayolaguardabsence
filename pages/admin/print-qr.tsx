@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { getStoredPoints } from '@/lib/mock-data'
 import { PatrolPoint } from '@/types'
 
 export default function PrintQRCodes() {
+  const router = useRouter()
   const [points, setPoints] = useState<PatrolPoint[]>([])
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const adminSession = localStorage.getItem('ayola_admin_session')
+      if (!adminSession) {
+        router.push('/admin/login')
+        return
+      }
+    }
     setPoints(getStoredPoints())
-  }, [])
+  }, [router])
 
   return (
     <div className='min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-6 font-sans select-text'>

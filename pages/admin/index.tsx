@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
 import { useTheme } from 'next-themes'
 
@@ -9,6 +10,7 @@ import autoTable from 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 
 const PatrolMap = dynamic(() => import('@/components/patrol-map'), { ssr: false })
+const LocationPickerMap = dynamic(() => import('@/components/location-picker-map'), { ssr: false })
 import {
   getStoredLogs,
   getStoredPoints,
@@ -24,8 +26,10 @@ import {
 import { PatrolLog, PatrolPoint, GuardUser, DashboardStats } from '@/types'
 
 export default function AdminDashboard() {
+  const router = useRouter()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const [adminUser, setAdminUser] = useState<any>(null)
   const [logs, setLogs] = useState<PatrolLog[]>([])
   const [points, setPoints] = useState<PatrolPoint[]>([])
   const [guards, setGuards] = useState<GuardUser[]>([])
@@ -51,7 +55,14 @@ export default function AdminDashboard() {
   // Point Modals State
   const [showAddPointModal, setShowAddPointModal] = useState(false)
   const [editingPoint, setEditingPoint] = useState<PatrolPoint | null>(null)
-  const [newPoint, setNewPoint] = useState({ name: '', area: '', code: '', instructions: '' })
+  const [newPoint, setNewPoint] = useState({
+    name: '',
+    area: '',
+    code: '',
+    instructions: '',
+    latitude: 1.154500,
+    longitude: 104.054500,
+  })
 
   // Guard Modals State
   const [showAddGuardModal, setShowAddGuardModal] = useState(false)
@@ -77,9 +88,24 @@ export default function AdminDashboard() {
   }
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const session = localStorage.getItem('ayola_admin_session')
+      if (!session) {
+        router.push('/admin/login')
+        return
+      }
+      setAdminUser(JSON.parse(session))
+    }
     setMounted(true)
     reloadData()
-  }, [])
+  }, [router])
+
+  const handleAdminLogout = () => {
+    if (confirm('Apakah Anda yakin ingin keluar dari Portal Admin?')) {
+      localStorage.removeItem('ayola_admin_session')
+      router.push('/admin/login')
+    }
+  }
 
   // Filter Logic
   const filteredLogs = logs.filter((log) => {
@@ -136,15 +162,15 @@ export default function AdminDashboard() {
       scheduleStart: '08:00',
       scheduleEnd: '20:00',
       instructions: newPoint.instructions || 'Pastikan area aman & terkunci.',
-      latitude: -1.158000 + Math.random() * 0.003,
-      longitude: 104.053000 + Math.random() * 0.003,
+      latitude: newPoint.latitude || 1.154500,
+      longitude: newPoint.longitude || 104.054500,
       allowedRadiusMeters: 50,
       imageSample: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80',
     }
 
     savePatrolPoint(created)
     reloadData()
-    setNewPoint({ name: '', area: '', code: '', instructions: '' })
+    setNewPoint({ name: '', area: '', code: '', instructions: '', latitude: 1.154500, longitude: 104.054500 })
     setShowAddPointModal(false)
     alert(`Titik patroli "${created.name}" (${created.code}) berhasil dibuat!`)
   }
@@ -333,6 +359,14 @@ export default function AdminDashboard() {
             <Link href='/' className='text-xs px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold rounded-xl border border-slate-200 dark:border-slate-700 transition-colors flex items-center space-x-1.5'>
               <span>📱 Buka PWA Satpam</span>
             </Link>
+
+            <button
+              onClick={handleAdminLogout}
+              className='text-xs px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold rounded-xl border border-red-500/30 transition-colors flex items-center space-x-1.5'
+              title='Keluar dari Portal Admin'
+            >
+              <span>🔑 Keluar Admin</span>
+            </button>
           </div>
         </div>
       </header>
@@ -966,9 +1000,9 @@ export default function AdminDashboard() {
 
       {/* Modal Tambah Titik QR */}
       {showAddPointModal && (
-        <div className='fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4'>
-          <div className='max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4'>
-            <h3 className='text-lg font-bold text-slate-800 dark:text-slate-100'>Tambah Titik Patroli (QR Point)</h3>
+        <div className='fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto'>
+          <div className='max-w-lg w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 my-8'>
+            <h3 className='text-lg font-bold text-slate-800 dark:text-slate-100'>Tambah Titik Patroli Baru (QR Point)</h3>
             <form onSubmit={handleAddPoint} className='space-y-3 text-xs'>
               <div>
                 <label className='block font-semibold text-slate-700 dark:text-slate-300 mb-1'>Nama Titik Patroli</label>
@@ -991,6 +1025,15 @@ export default function AdminDashboard() {
                   placeholder='e.g. Lantai 2 / Exterior East'
                   className='w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-slate-800 dark:text-slate-200 focus:border-amber-400 focus:outline-none'
                   required
+                />
+              </div>
+
+              {/* Map Location Picker */}
+              <div className='pt-1'>
+                <LocationPickerMap
+                  latitude={newPoint.latitude}
+                  longitude={newPoint.longitude}
+                  onChangeLocation={(lat, lng) => setNewPoint((prev) => ({ ...prev, latitude: lat, longitude: lng }))}
                 />
               </div>
 
@@ -1031,8 +1074,8 @@ export default function AdminDashboard() {
 
       {/* Modal Edit Titik QR */}
       {editingPoint && (
-        <div className='fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4'>
-          <div className='max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4'>
+        <div className='fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto'>
+          <div className='max-w-lg w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4 my-8'>
             <h3 className='text-lg font-bold text-slate-800 dark:text-slate-100'>Edit Titik Patroli</h3>
             <form onSubmit={handleUpdatePoint} className='space-y-3 text-xs'>
               <div>
@@ -1054,6 +1097,15 @@ export default function AdminDashboard() {
                   onChange={(e) => setEditingPoint({ ...editingPoint, area: e.target.value })}
                   className='w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl p-3 text-slate-800 dark:text-slate-200 focus:border-amber-400 focus:outline-none'
                   required
+                />
+              </div>
+
+              {/* Map Location Picker */}
+              <div className='pt-1'>
+                <LocationPickerMap
+                  latitude={editingPoint.latitude}
+                  longitude={editingPoint.longitude}
+                  onChangeLocation={(lat, lng) => setEditingPoint((prev) => prev ? { ...prev, latitude: lat, longitude: lng } : null)}
                 />
               </div>
 
