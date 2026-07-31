@@ -1,7 +1,7 @@
 {
-	"name": "Rice Bowl",
-	"short_name": "Rice Bowl",
-	"description": "Fluffless jasmine rice for those cold winter nights",
+	"name": "AYOLA OCARINA - Patroli Satpam",
+	"short_name": "Ayola Satpam",
+	"description": "Sistem Absensi QR & Patroli Presisi Satpam Ayola Ocarina",
 	"icons": [
 		{
 			"src": "/images/icon-192.png",
@@ -29,5 +29,7 @@
 	"start_url": "/?source=pwa",
 	"orientation": "portrait",
 	"display": "standalone",
+	"background_color": "#0f172a",
+	"theme_color": "#1e293b",
 	"scope": "/"
 }

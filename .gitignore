@@ -7,3 +7,10 @@ node_modules
 # Generated via next-pwa
 **/public/workbox**
 **/public/sw**
+
+# Backend / Composer / Env
+backend/vendor/
+backend/.env
+.env*
+.DS_Store
+

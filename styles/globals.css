@@ -2,11 +2,95 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-	@apply min-h-screen select-none bg-zinc-50 text-zinc-900 antialiased p-safe dark:bg-zinc-900 dark:text-zinc-50;
+@layer base {
+  body {
+    @apply min-h-screen select-none bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased p-safe transition-colors duration-200;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+}
 
-	/* PWA enhancements */
-	-webkit-overflow-scrolling: touch;
-	-webkit-tap-highlight-color: transparent;
-	-webkit-touch-callout: none;
+/* Mobile Frame & Device Simulation Styles */
+.mobile-app-shell {
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  position: relative;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.dark .mobile-app-shell {
+  background-color: #020617;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+@media (min-width: 640px) {
+  .mobile-app-shell {
+    min-height: 844px;
+    height: 844px;
+    max-height: 92vh;
+    border-radius: 48px;
+    border: 10px solid #cbd5e1;
+    outline: 2px solid rgba(245, 158, 11, 0.4);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    overflow-y: auto;
+  }
+
+  .dark .mobile-app-shell {
+    border: 10px solid #1e293b;
+  }
+
+  .mobile-app-shell::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .mobile-app-shell::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .mobile-app-shell::-webkit-scrollbar-thumb {
+    background: #94a3b8;
+    border-radius: 10px;
+  }
+
+  .dark .mobile-app-shell::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+}
+
+/* Dynamic Notch Bar on Desktop Simulation */
+.mobile-notch {
+  width: 120px;
+  height: 24px;
+  background-color: #f1f5f9;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+}
+
+.dark .mobile-notch {
+  background-color: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Touch active scale feedback */
+.active-press {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.active-press:active {
+  transform: scale(0.96);
+  opacity: 0.9;
 }
